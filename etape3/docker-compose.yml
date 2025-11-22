@@ -1,0 +1,38 @@
+﻿version: '3.8'
+
+services:
+  data:
+    image: mariadb:10.11
+    container_name: DATA
+    environment:
+      - MARIADB_RANDOM_ROOT_PASSWORD=yes
+    volumes:
+      - ../etape2/db-init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - tp3-net
+
+  script:
+    build:
+      context: ../etape2/php
+    container_name: SCRIPT
+    volumes:
+      - ../etape2/site:/app:ro
+    networks:
+      - tp3-net
+
+  http:
+    image: nginx:latest
+    container_name: HTTP
+    ports:
+      - "8080:80"
+    volumes:
+      - ../etape2/site:/app:ro
+      - ../etape2/nginx:/etc/nginx/conf.d:ro
+    depends_on:
+      - script
+    networks:
+      - tp3-net
+
+networks:
+  tp3-net:
+    name: tp3-net
